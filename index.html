@@ -1,0 +1,221 @@
+<html>
+    <head>
+        <style type="text/css">
+            #mainboard.activeGame{
+                border-collapse: collapse;
+                position: absolute;
+                height: 500px;
+                width: 500px;
+                
+            }
+            #mainboard.endGame{
+                display: none;
+            }
+            #mainboard td{
+                border: 1px solid;
+                width: 11.11111111%;
+                height: 11.11111111%;
+                text-align: center;
+            }
+            #here_options{
+                position: absolute;
+                right: 40%;
+            }
+            #newGame input{
+                padding: 20px;
+                font-size: 30px;
+                border-radius: 30%;
+                border: thin;
+            }
+            #testHere{
+                position: absolute;
+                top: 550px;
+            }
+            
+        </style>
+        <script src="jquery-3.2.0.min.js"></script>
+        <script>
+            var userPiece = "X";
+            var gameBoard = [];
+            function makeTable() { //make blank table. 
+                var table = $('<table></table>').attr("id", "mainboard").addClass("activeGame");
+                for(i=0; i<3; i++){
+                    var row = $('<tr></tr>').addClass("row_" + i);
+                    for (a=0; a<3; a++) {
+                        var cellClassNumber = (a+(i*3))
+                        var cell = $('<td></td>').addClass("cell_" + cellClassNumber);
+                        row.append(cell);
+                    }
+                    table.append(row);
+                }
+                
+                $('#here_table').append(table);
+                
+            }
+            function makeMove(cellClass, piece) {
+                var cellNumber = parseInt(cellClass.replace(/[^0-9]/g, ""));
+                if (gameBoard[cellNumber] == null) {
+                    gameBoard[cellNumber] = piece;
+                    $("." + cellClass).append(piece);
+                    AImakeMove();
+                }
+            }
+            /*function AImakeMove() {
+                var theoryBoard = gameBoard; //so that the official game board does not get messed up
+                //var winDetector = detectWin(theoryBoard);
+                var AIPiece = "O";
+                if (userPiece == null) {
+                    return 0;
+                }
+                var emptySpaces = 0; //number of cells that have not been occupied yet
+                var emptyArray=[""]; //all the moves AI can make
+                for (a=0;a<9;a++) {
+                    if (theoryBoard[a] != null) {}
+                    else{
+                        emptySpaces+=1;
+                        emptyArray += a;
+                    }
+                }
+                
+                if (declareWinner(theoryBoard) != 1) { //this means that someone has won already, let func do its thing
+                }
+                else{// we can play!
+                    var bestMove = minimax(theoryBoard, emptySpaces, emptyArray);
+                    gameBoard[bestMove] = AIPiece;
+                    $(".cell_" + bestMove).append(AIPiece);
+                }
+            }
+            function minimax(board, emptySpaces, emptyArray) {
+                var moveAndScore = [];
+                for (a=0; a<emptySpaces; a++) {
+                    moveAndScore[a] = [];
+                    moveAndScore[a][0] = emptyArray[a];
+                    moveAndScore[a][1] = 0;
+                }
+                alert (moveAndScore);
+                for (a=0; a<emptySpaces; a++) {
+                    
+                }
+            }*/
+            function giveScore(player, gameArray) {
+                var winner = detectWin(gameArray);
+                if (winner==player) {
+                    return 10;
+                }
+                else if (winner != player) {
+                    return -10;
+                }
+                else{
+                    return 0;
+                }
+            }
+            function reversePlayer(player) {
+                if (player == "X") {
+                    var oppositePlayer = "O";
+                }
+                else{
+                    oppositePlayer = "X";
+                }
+            }
+            function minimax(player, gameBoard) {
+                if (giveScore(player, gameBoard) != 0) { //means minimax won or lost
+                    return giveScore(player, gameBoard);
+                }
+                else{
+                    var moveAndScore = [];
+                    var emptySpaces = 0; //number of cells that have not been occupied yet
+                    var emptyArray=[""]; //all the moves AI can make
+                    for (a=0;a<9;a++) {
+                        if (gameBoard[a] != null) {}
+                        else{
+                            emptySpaces+=1;
+                            emptyArray += a;
+                        }
+                    }
+                    for (a=0; a<emptySpaces; a++) {
+                        moveAndScore[a] = [];
+                        moveAndScore[a][0] = emptyArray[a];
+                    }
+                    for (a=0;a<emptySpaces; a++) {
+                        gameBoard[emptyArray[a]] = player;
+                        moveAndScore[a][1] = minimax(reversePlayer(player), gameBoard);
+                    }
+                    
+                }
+            }
+            function detectWin(gameArray) {
+                var one=gameArray[0], two=gameArray[1], three=gameArray[2], four=gameArray[3], five=gameArray[4], six=gameArray[5], seven=gameArray[6], eight=gameArray[7], nine=gameArray[8];
+                if (one==two && two==three && one!=null) {
+                    return one;
+                }
+                else if (four==five && five==six && four!=null) {
+                    return four;
+                }
+                else if (seven==eight && eight==nine && seven!=null) {
+                    return seven;
+                }
+                else if (one==four && four==seven && one!=null) {
+                    return one;
+                }
+                else if (two==five && five==eight && two!=null) {
+                    return two;
+                }
+                else if (three==six && six==nine && three!=null) {
+                    return three;
+                }
+                else if (one==five && five==nine && one!=null) {
+                    return one;
+                }
+                else if (three==five && five==seven && three!=null) {
+                    return three;
+                }
+                else{
+                    return 1;
+                }
+            }
+            function declareWinner(gameArray) {
+                var detectWinner = detectWin(gameArray);
+                if (detectWinner == 1) {
+                    return 1;
+                }
+                else{
+                   alert(detectWinner + " wins! Click X or O to start again!");
+                    $('#mainboard').removeClass('activeGame').addClass('endGame'); 
+                }
+                
+            }
+            function resetGame() {
+                for (i=0;i<9;i++) {
+                    $(".cell_" + i).text(null);
+                    gameBoard[i] = null;
+                    $('#mainboard').removeClass('endGame').addClass('activeGame');
+                }
+            }
+        </script>
+        
+    </head>
+    <body>
+        <div id="here_table"> <script>makeTable();</script> </div>
+        <div id="here_options">Start A New Game <br/><br/>
+        <form id="newGame">
+            <input type="button" id="x_Button" class="X" value="X"/>
+            <!--<input type="button" id="o_Button" class="O" value="O"/>-->
+        </form>
+        </div>
+        <div id="testHere"><button id="test">Test</button></div>
+        <script>
+            $("#newGame input").click(function(){
+                resetGame();
+                userPiece = $(this).attr("class");
+            })
+            $("#mainboard td").click(function(){
+                var whichTd = $(this).attr("class");
+                makeMove(whichTd, userPiece);
+                //declareWinner(gameBoard);
+            })
+            $("#test").click(function(){
+                
+            })
+        </script>
+    </body>
+</html>
